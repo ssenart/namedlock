@@ -1,0 +1,7 @@
+# Editor
+.vscode/
+*.swp
+*~
+
+# Test artifacts
+/tmp/

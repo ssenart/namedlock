@@ -1,0 +1,4 @@
+shell=bash
+enable=all
+# SC2064: trap uses single quotes intentionally in cmd_wrap (name is fixed at trap-set time)
+disable=SC2064
