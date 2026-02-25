@@ -59,10 +59,10 @@ install:
 
 .PHONY: release
 release:
-	@echo "Releasing v$(VERSION)…"
-	git tag -a "v$(VERSION)" -m "Release $(VERSION)"
-	git push origin "v$(VERSION)"
-	gh release create "v$(VERSION)" --title "v$(VERSION)" --generate-notes
+	@echo "Releasing $(VERSION)…"
+	git tag -a "$(VERSION)" -m "Release $(VERSION)"
+	git push origin "$(VERSION)"
+	gh release create "$(VERSION)" --title "$(VERSION)" --generate-notes
 
 .PHONY: uninstall
 uninstall:

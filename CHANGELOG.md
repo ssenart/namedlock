@@ -25,5 +25,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Makefile with `help`, `check-deps`, `install-deps`, `test`, `lint`, `install`, `uninstall`, `release` targets
 - shellcheck-clean with `.shellcheckrc`
 
-[Unreleased]: https://github.com/ssenart/namedlock/compare/v1.0.0...HEAD
-[1.0.0]: https://github.com/ssenart/namedlock/releases/tag/v1.0.0
+[Unreleased]: https://github.com/ssenart/namedlock/compare/1.0.0...HEAD
+[1.0.0]: https://github.com/ssenart/namedlock/releases/tag/1.0.0
