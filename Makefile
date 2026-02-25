@@ -5,6 +5,8 @@ TESTS   := tests/namedlock.bats
 
 BATS_LIBS := /usr/lib/bats
 
+VERSION := $(shell grep '^readonly VERSION=' bin/namedlock | cut -d'"' -f2)
+
 .DEFAULT_GOAL := help
 
 # ── Targets ───────────────────────────────────────────────────────────────────
@@ -19,8 +21,10 @@ help:
 	@echo "  lint          Run shellcheck static analysis"
 	@echo "  install       Install namedlock to PREFIX/bin  (default: ~/.local/bin)"
 	@echo "  uninstall     Remove namedlock from PREFIX/bin"
+	@echo "  release       Tag and publish a GitHub release (uses VERSION from script)"
 	@echo ""
 	@echo "  PREFIX=$(PREFIX)"
+	@echo "  VERSION=$(VERSION)"
 
 .PHONY: install-deps
 install-deps:
@@ -52,6 +56,13 @@ lint:
 install:
 	install -Dm755 $(SCRIPT) $(PREFIX)/bin/namedlock
 	@echo "Installed to $(PREFIX)/bin/namedlock"
+
+.PHONY: release
+release:
+	@echo "Releasing v$(VERSION)…"
+	git tag -a "v$(VERSION)" -m "Release $(VERSION)"
+	git push origin "v$(VERSION)"
+	gh release create "v$(VERSION)" --title "v$(VERSION)" --generate-notes
 
 .PHONY: uninstall
 uninstall:

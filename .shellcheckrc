@@ -1,4 +1,6 @@
 shell=bash
 enable=all
 # SC2064: trap uses single quotes intentionally in cmd_wrap (name is fixed at trap-set time)
-disable=SC2064
+# SC2250: style preference for ${var} over $var — project uses $var consistently
+# SC2310: clean_stale_if_any returns 0/1 explicitly; set -e interaction is intentional
+disable=SC2064,SC2250,SC2310

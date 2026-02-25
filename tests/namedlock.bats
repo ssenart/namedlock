@@ -46,6 +46,12 @@ kill_all_holders() {
     assert_output --partial "Usage"
 }
 
+@test "--version exits 0 and prints version" {
+    run -0 "$NL" --version
+    assert_output --partial "namedlock"
+    assert_output --regexp "[0-9]+\.[0-9]+\.[0-9]+"
+}
+
 @test "--help exits 0 and prints usage" {
     run -0 "$NL" --help
     assert_output --partial "Usage"

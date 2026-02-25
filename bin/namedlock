@@ -33,6 +33,7 @@ set -euo pipefail
 # ── Constants ─────────────────────────────────────────────────────────────────
 
 readonly TOOL_NAME="namedlock"
+readonly VERSION="1.0.0"
 readonly NAME_PATTERN='^[a-zA-Z0-9_.-]+$'
 
 # ── Lock directory resolution ─────────────────────────────────────────────────
@@ -52,7 +53,8 @@ resolve_lock_dir() {
 log() {
     local level="$1"
     shift
-    local msg="[$(date '+%Y-%m-%d %H:%M:%S')] [$level] [$TOOL_NAME] $*"
+    local msg
+    msg="[$(date '+%Y-%m-%d %H:%M:%S')] [$level] [$TOOL_NAME] $*"
     if [[ -n "${NAMEDLOCK_LOG:-}" ]]; then
         printf '%s\n' "$msg" >> "$NAMEDLOCK_LOG"
     fi
@@ -450,7 +452,7 @@ cmd_wrap() {
     trap - EXIT INT TERM HUP
     cmd_release "$name"
 
-    return $cmd_exit
+    return "$cmd_exit"
 }
 
 # ── usage ─────────────────────────────────────────────────────────────────────
@@ -465,6 +467,7 @@ Usage:
   namedlock status  [<name>]
   namedlock list
   namedlock wrap <name> [--wait] [--timeout <secs>] -- <cmd> [args…]
+  namedlock --version
   namedlock --help
 
 Lock name characters: [a-zA-Z0-9_.-]
@@ -503,6 +506,7 @@ main() {
         status)         cmd_status  "$@" ;;
         list)           cmd_list    "$@" ;;
         wrap)           cmd_wrap    "$@" ;;
+        --version|-V)   printf '%s %s\n' "$TOOL_NAME" "$VERSION"; exit 0 ;;
         --help|-h|help) usage; exit 0 ;;
         *)
             printf 'namedlock: unknown command %q\n' "$subcmd" >&2
