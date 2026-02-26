@@ -1,0 +1,17 @@
+---
+- name: Ensure install directory exists
+  ansible.builtin.file:
+    path: "{{ namedlock_effective_dir }}"
+    state: directory
+    mode: "0755"
+
+- name: Copy namedlock binary
+  ansible.builtin.copy:
+    src: "{{ namedlock_source }}"
+    dest: "{{ namedlock_effective_dir }}/namedlock"
+    mode: "0755"
+
+- name: Smoke-test namedlock binary
+  ansible.builtin.command:
+    cmd: "{{ namedlock_effective_dir }}/namedlock status"
+  changed_when: false

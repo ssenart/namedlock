@@ -175,6 +175,57 @@ Or symlink directly:
 ln -s /path/to/tools/namedlock/bin/namedlock ~/.local/bin/namedlock
 ```
 
+### Ansible
+
+For fleet deployments or IaC-managed hosts, an Ansible role is provided under `ansible/`.
+
+```bash
+# User install, localhost (default — no sudo)
+ansible-playbook ansible/install.yml
+
+# System install, localhost (/usr/local/bin, needs sudo)
+ansible-playbook ansible/install.yml -e namedlock_install_scope=system -K
+
+# Remote user install
+ansible-playbook -i ansible/inventory.example.yml ansible/install.yml \
+  -e "namedlock_hosts=myserver.example.com"
+
+# Remote system install
+ansible-playbook -i ansible/inventory.example.yml ansible/install.yml \
+  -e "namedlock_hosts=myserver.example.com" \
+  -e namedlock_install_scope=system -K
+
+# Fleet: all remote_servers, system
+ansible-playbook -i ansible/inventory.example.yml ansible/install.yml \
+  -e "namedlock_hosts=remote_servers" \
+  -e namedlock_install_scope=system -K
+
+# With test/lint deps (e.g. CI host)
+ansible-playbook ansible/install.yml \
+  -e namedlock_install_scope=system \
+  -e namedlock_install_test_deps=true -K
+
+# Dry run
+ansible-playbook ansible/install.yml --check --diff
+```
+
+To uninstall, swap the playbook — all flags mirror install:
+
+```bash
+# User uninstall, localhost (default)
+ansible-playbook ansible/uninstall.yml
+
+# System uninstall, localhost
+ansible-playbook ansible/uninstall.yml -e namedlock_install_scope=system -K
+
+# Remote uninstall
+ansible-playbook -i ansible/inventory.example.yml ansible/uninstall.yml \
+  -e "namedlock_hosts=myserver.example.com"
+```
+
+Copy `ansible/inventory.example.yml` to `ansible/inventory.yml` and edit for your environment.
+The role reads the binary from the controller (`bin/namedlock`) and pushes it to targets — no `make` required on remote hosts.
+
 ## Verification
 
 ```bash

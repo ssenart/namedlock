@@ -1,0 +1,16 @@
+---
+- name: Resolve effective install directory
+  ansible.builtin.set_fact:
+    namedlock_effective_dir: >-
+      {{
+        namedlock_system_install_dir
+        if namedlock_install_scope == 'system'
+        else namedlock_install_dir
+      }}
+
+- name: Install namedlock binary
+  ansible.builtin.include_tasks: install.yml
+
+- name: Install test/lint dependencies
+  ansible.builtin.include_tasks: deps.yml
+  when: namedlock_install_test_deps | bool

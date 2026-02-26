@@ -1,0 +1,7 @@
+---
+- name: "namedlock | install"
+  hosts: "{{ namedlock_hosts | default('localhost') }}"
+  become: "{{ namedlock_install_scope | default('user') == 'system' }}"
+  gather_facts: true
+  roles:
+    - namedlock

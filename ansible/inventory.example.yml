@@ -1,0 +1,11 @@
+---
+all:
+  children:
+    local:
+      hosts:
+        localhost:
+          ansible_connection: local
+    remote_servers:
+      hosts:
+        myserver.example.com:
+          ansible_user: deploy

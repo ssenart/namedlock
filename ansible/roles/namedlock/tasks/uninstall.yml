@@ -1,0 +1,5 @@
+---
+- name: Remove namedlock binary
+  ansible.builtin.file:
+    path: "{{ namedlock_effective_dir }}/namedlock"
+    state: absent

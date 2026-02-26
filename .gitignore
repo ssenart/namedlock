@@ -5,3 +5,6 @@
 
 # Test artifacts
 /tmp/
+
+# Ansible
+ansible/*.retry

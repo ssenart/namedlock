@@ -1,0 +1,20 @@
+---
+galaxy_info:
+  author: stephane
+  description: Install the namedlock named-lock CLI tool
+  license: MIT
+  min_ansible_version: "2.12"
+  platforms:
+    - name: Debian
+      versions:
+        - bullseye
+        - bookworm
+    - name: Ubuntu
+      versions:
+        - focal
+        - jammy
+        - noble
+  categories:
+    - system
+
+dependencies: []

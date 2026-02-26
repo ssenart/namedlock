@@ -1,0 +1,12 @@
+---
+namedlock_install_scope: "user"   # "user" or "system"
+namedlock_install_dir: "{{ ansible_env.HOME }}/.local/bin"   # user mode
+namedlock_system_install_dir: "/usr/local/bin"               # system mode
+namedlock_source: "{{ playbook_dir }}/../bin/namedlock"
+namedlock_install_test_deps: false
+namedlock_test_packages:
+  - bats
+  - bats-support
+  - bats-assert
+  - bats-file
+  - shellcheck

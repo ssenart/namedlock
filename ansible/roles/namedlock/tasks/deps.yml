@@ -1,0 +1,12 @@
+---
+- name: Assert Debian/Ubuntu for test dependency install
+  ansible.builtin.assert:
+    that: ansible_os_family == "Debian"
+    fail_msg: "Test dependency install via apt requires a Debian/Ubuntu host (got: {{ ansible_os_family }})"
+
+- name: Install test and lint packages
+  ansible.builtin.apt:
+    name: "{{ namedlock_test_packages }}"
+    state: present
+    update_cache: true
+  become: true
