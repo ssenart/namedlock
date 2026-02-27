@@ -1,19 +1,22 @@
 ---
 - name: "namedlock | uninstall"
-  hosts: "{{ namedlock_hosts | default('localhost') }}"
-  become: "{{ namedlock_install_scope | default('user') == 'system' }}"
+  hosts: all
   gather_facts: true
-  tasks:
-    - name: Resolve effective install directory
-      ansible.builtin.set_fact:
-        namedlock_effective_dir: >-
-          {{
-            namedlock_system_install_dir | default('/usr/local/bin')
-            if namedlock_install_scope | default('user') == 'system'
-            else namedlock_install_dir | default(ansible_env.HOME + '/.local/bin')
-          }}
 
-    - name: Remove namedlock binary
-      ansible.builtin.file:
-        path: "{{ namedlock_effective_dir }}/namedlock"
-        state: absent
+  tasks:
+    - block:
+        - name: Resolve effective install directory
+          ansible.builtin.set_fact:
+            namedlock_effective_dir: >-
+              {{
+                namedlock_system_install_dir | default('/usr/local/bin')
+                if install_scope | default('user') == 'system'
+                else namedlock_install_dir | default(ansible_env.HOME + '/.local/bin')
+              }}
+
+        - name: Remove namedlock binary
+          ansible.builtin.file:
+            path: "{{ namedlock_effective_dir }}/namedlock"
+            state: absent
+
+      become: "{{ install_scope | default('user') == 'system' }}"

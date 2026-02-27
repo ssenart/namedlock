@@ -8,3 +8,5 @@
 
 # Ansible
 ansible/*.retry
+ansible/inventory.*.yml
+!ansible/inventory.example.yml

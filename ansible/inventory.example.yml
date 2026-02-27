@@ -5,7 +5,8 @@ all:
       hosts:
         localhost:
           ansible_connection: local
+          ansible_become: false
     remote_servers:
       hosts:
         myserver.example.com:
-          ansible_user: deploy
+          ansible_user: admin

@@ -179,51 +179,74 @@ ln -s /path/to/tools/namedlock/bin/namedlock ~/.local/bin/namedlock
 
 For fleet deployments or IaC-managed hosts, an Ansible role is provided under `ansible/`.
 
+The install scope is controlled by the `install_scope` variable:
+
+| `install_scope` | Install path | Runs as |
+|-----------------|-------------|---------|
+| `user` (default) | `~/.local/bin/` | current user |
+| `system` | `/usr/local/bin/` | root (via sudo) |
+
+No `--become` flag is needed — the playbook manages privilege escalation
+internally based on `install_scope`.
+
+Overridable variables (pass with `-e`):
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `install_scope` | `user` | `user` or `system` |
+| `namedlock_install_dir` | `~/.local/bin` | install path for user scope |
+| `namedlock_system_install_dir` | `/usr/local/bin` | install path for system scope |
+| `namedlock_source` | `bin/namedlock` (on controller) | path to binary on control node |
+| `namedlock_install_test_deps` | `false` | also install bats/shellcheck test deps |
+
 ```bash
-# User install, localhost (default — no sudo)
-ansible-playbook ansible/install.yml
+# Local  - user install
+ansible-playbook -i ansible/inventory.example.yml ansible/install.yml --limit localhost
 
-# System install, localhost (/usr/local/bin, needs sudo)
-ansible-playbook ansible/install.yml -e namedlock_install_scope=system -K
+# Local  - system install
+ansible-playbook -i ansible/inventory.example.yml ansible/install.yml --limit localhost \
+  -e install_scope=system
 
-# Remote user install
+# Remote - user install
 ansible-playbook -i ansible/inventory.example.yml ansible/install.yml \
-  -e "namedlock_hosts=myserver.example.com"
+  --limit myserver.example.com
 
-# Remote system install
+# Remote - system install
 ansible-playbook -i ansible/inventory.example.yml ansible/install.yml \
-  -e "namedlock_hosts=myserver.example.com" \
-  -e namedlock_install_scope=system -K
-
-# Fleet: all remote_servers, system
-ansible-playbook -i ansible/inventory.example.yml ansible/install.yml \
-  -e "namedlock_hosts=remote_servers" \
-  -e namedlock_install_scope=system -K
+  --limit myserver.example.com \
+  -e install_scope=system
 
 # With test/lint deps (e.g. CI host)
-ansible-playbook ansible/install.yml \
-  -e namedlock_install_scope=system \
-  -e namedlock_install_test_deps=true -K
+ansible-playbook -i ansible/inventory.example.yml ansible/install.yml --limit localhost \
+  -e install_scope=system \
+  -e namedlock_install_test_deps=true
 
 # Dry run
-ansible-playbook ansible/install.yml --check --diff
+ansible-playbook -i ansible/inventory.example.yml ansible/install.yml --limit localhost \
+  --check --diff
 ```
 
 To uninstall, swap the playbook — all flags mirror install:
 
 ```bash
-# User uninstall, localhost (default)
-ansible-playbook ansible/uninstall.yml
+# Local  - user uninstall
+ansible-playbook -i ansible/inventory.example.yml ansible/uninstall.yml --limit localhost
 
-# System uninstall, localhost
-ansible-playbook ansible/uninstall.yml -e namedlock_install_scope=system -K
+# Local  - system uninstall
+ansible-playbook -i ansible/inventory.example.yml ansible/uninstall.yml --limit localhost \
+  -e install_scope=system
 
-# Remote uninstall
+# Remote - user uninstall
 ansible-playbook -i ansible/inventory.example.yml ansible/uninstall.yml \
-  -e "namedlock_hosts=myserver.example.com"
+  --limit myserver.example.com
+
+# Remote - system uninstall
+ansible-playbook -i ansible/inventory.example.yml ansible/uninstall.yml \
+  --limit myserver.example.com \
+  -e install_scope=system
 ```
 
-Copy `ansible/inventory.example.yml` to `ansible/inventory.yml` and edit for your environment.
+Copy `ansible/inventory.example.yml` to `ansible/inventory.<hostname>.yml` and edit for your environment.
 The role reads the binary from the controller (`bin/namedlock`) and pushes it to targets — no `make` required on remote hosts.
 
 ## Verification

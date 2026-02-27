@@ -4,7 +4,7 @@
     namedlock_effective_dir: >-
       {{
         namedlock_system_install_dir
-        if namedlock_install_scope == 'system'
+        if install_scope | default('user') == 'system'
         else namedlock_install_dir
       }}
 

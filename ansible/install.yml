@@ -1,7 +1,10 @@
 ---
 - name: "namedlock | install"
-  hosts: "{{ namedlock_hosts | default('localhost') }}"
-  become: "{{ namedlock_install_scope | default('user') == 'system' }}"
+  hosts: all
   gather_facts: true
-  roles:
-    - namedlock
+
+  tasks:
+    - block:
+        - ansible.builtin.import_role:
+            name: namedlock
+      become: "{{ install_scope | default('user') == 'system' }}"
