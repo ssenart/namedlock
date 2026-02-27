@@ -249,6 +249,147 @@ ansible-playbook -i ansible/inventory.example.yml ansible/uninstall.yml \
 Copy `ansible/inventory.example.yml` to `ansible/inventory.<hostname>.yml` and edit for your environment.
 The role reads the binary from the controller (`bin/namedlock`) and pushes it to targets — no `make` required on remote hosts.
 
+## Monitoring
+
+### Check lock state
+
+```bash
+# All locks (human-readable table)
+namedlock status
+
+# Single lock
+namedlock status borgmatic
+```
+
+Example output:
+```
+borgmatic    HELD by PID 12345    (runtime: 42s)
+other-lock   FREE
+stale-lock   STALE (PID 99999 not running)
+```
+
+### List active locks (for scripting)
+
+```bash
+namedlock list
+```
+
+### Inspect the lock directory
+
+```bash
+# Resolve the active lock directory
+echo "${NAMEDLOCK_DIR:-${XDG_RUNTIME_DIR:+$XDG_RUNTIME_DIR/namedlock}}"
+# fallback: $HOME/.cache/namedlock
+
+ls -la "${XDG_RUNTIME_DIR:-$HOME/.cache}/namedlock/"
+```
+
+Each lock leaves two files: `<name>.lock` (held open by flock) and `<name>.pid`.
+
+### Enable structured logging
+
+```bash
+export NAMEDLOCK_LOG=/var/log/namedlock.log
+namedlock acquire borgmatic
+tail -f /var/log/namedlock.log
+```
+
+Log format: `[YYYY-MM-DD HH:MM:SS] [LEVEL] [namedlock] …`
+
+---
+
+## Troubleshooting
+
+### `namedlock: command not found`
+
+The binary is not in `PATH`. Install it or add the install directory:
+
+```bash
+# User install
+export PATH="$HOME/.local/bin:$PATH"
+
+# System install
+sudo cp bin/namedlock /usr/local/bin/namedlock
+```
+
+### Lock stuck — process died without releasing
+
+`namedlock status` reports `STALE` when the holder PID is no longer running.
+Stale locks are detected and cleaned up automatically on the next `acquire`:
+
+```bash
+namedlock status borgmatic   # shows STALE
+namedlock acquire borgmatic  # auto-cleans stale lock, then acquires
+```
+
+To force-release manually:
+
+```bash
+namedlock release borgmatic  # always exits 0, safe on stale locks
+```
+
+### Lock held after a borgmatic error
+
+When borgmatic is configured with namedlock hooks and a backup fails,
+the `after: error` hook should release the lock:
+
+```yaml
+commands:
+  - after: error
+    run:
+      - namedlock release borgmatic
+```
+
+If the hook itself failed (e.g. `namedlock` not in PATH for the systemd
+service), the lock will be stale. Verify the binary is accessible in the
+service's environment:
+
+```bash
+# User service
+systemctl --user show borgmatic.service | grep Environment
+
+# Release manually
+namedlock release borgmatic
+```
+
+### Exit code 1 — lock already held
+
+A concurrent process holds the lock. Use `--wait` to block until it is
+released, or `--timeout` to cap the wait:
+
+```bash
+namedlock acquire borgmatic --wait --timeout 60
+```
+
+### Exit code 75 — timeout waiting for lock
+
+The lock was not released within the timeout period. Check what process
+holds it and whether it is still healthy:
+
+```bash
+namedlock status borgmatic
+ps -p $(cat "${XDG_RUNTIME_DIR:-$HOME/.cache}/namedlock/borgmatic.pid")
+```
+
+### Permission denied on lock directory
+
+The lock directory is not writable. Override with `NAMEDLOCK_DIR`:
+
+```bash
+export NAMEDLOCK_DIR=/tmp/namedlock-$(id -u)
+mkdir -p "$NAMEDLOCK_DIR"
+```
+
+### `flock: command not found`
+
+`flock` is part of `util-linux`, pre-installed on Debian/Ubuntu. If missing:
+
+```bash
+sudo apt install util-linux
+```
+
+---
+
 ## Verification
 
 ```bash
